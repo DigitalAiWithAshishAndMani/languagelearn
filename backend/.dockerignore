@@ -1,0 +1,57 @@
+# Python runtime artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.egg
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Virtual environment (installed fresh inside the container via requirements.txt)
+venv/
+.venv/
+env/
+ENV/
+
+# Local database (never bake local data into the image)
+database.db
+database.db-journal
+*.db
+*.sqlite3
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+
+# Git
+.git/
+.gitignore
+
+# Test and coverage artifacts
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+nosetests.xml
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Documentation
+*.md
+docs/
+
+# OS artifacts
+.DS_Store
+Thumbs.db
