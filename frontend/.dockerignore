@@ -1,0 +1,48 @@
+# Node modules (reinstalled inside the container via npm ci)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build output (rebuilt inside the container via npm run build)
+dist/
+dist-ssr/
+build/
+
+# Environment secrets
+.env
+.env.*
+!.env.example
+*.local
+
+# Test and coverage
+coverage/
+*.lcov
+.nyc_output/
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# Git
+.git/
+.gitignore
+
+# IDE and editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Documentation
+*.md
+
+# OS artifacts
+.DS_Store
+Thumbs.db
+
+# TypeScript compiled output (we build from source inside the container)
+*.tsbuildinfo

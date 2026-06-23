@@ -1,0 +1,104 @@
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: languagelearn-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+      # Do not overwrite the container's virtual env/installed packages with local host folders
+      - /app/venv
+    environment:
+      - APP_NAME=Language Learn API (Docker)
+      - DEBUG=True
+      - DATABASE_URL=sqlite:///./database.db
+      - LOCAL_MODEL_BASE_URL=http://host.docker.internal:1234/v1 # LM Studio / llama.cpp / LocalAI default on host machine
+      - LOCAL_MODEL_API_KEY=lm-studio-key-not-needed
+      - LOCAL_MODEL_NAME=meta-llama-3-8b-instruct
+      - LOCAL_EMBEDDING_MODEL_NAME=nomic-embed-text-v1.5
+      - JUDGE0_API_URL=http://judge0-server:2358 # Internal Docker container URL
+      - JUDGE0_API_KEY=
+      - JWT_SECRET_KEY=super_secret_key_change_me_in_production
+    extra_hosts:
+      # Allows backend container to connect to localhost/services running on the host machine (like LM Studio or Ollama)
+      - "host.docker.internal:host-gateway"
+    # Enable hot reloading for local development
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      - judge0-server
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: languagelearn-frontend
+    ports:
+      - "80:80" # Nginx production server
+    # For hot-reloading development override, you can comment the port 80 above and run Vite dev server:
+    # ports:
+    #   - "5173:5173"
+    # volumes:
+    #   - ./frontend:/app
+    #   - /app/node_modules
+    # command: npm run dev -- --host
+
+  judge0-server:
+    image: judge0/judge0:1.13.0
+    container_name: judge0-server
+    ports:
+      - "2358:2358"
+    privileged: true
+    environment:
+      - REDIS_HOST=judge0-redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=redis_password_here
+      - POSTGRES_HOST=judge0-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres_password_here
+      - POSTGRES_DB=judge0
+    depends_on:
+      - judge0-db
+      - judge0-redis
+    restart: always
+
+  judge0-worker:
+    image: judge0/judge0:1.13.0
+    container_name: judge0-worker
+    command: ["./scripts/workers"]
+    privileged: true
+    environment:
+      - REDIS_HOST=judge0-redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=redis_password_here
+      - POSTGRES_HOST=judge0-db
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres_password_here
+      - POSTGRES_DB=judge0
+    depends_on:
+      - judge0-db
+      - judge0-redis
+    restart: always
+
+  judge0-db:
+    image: postgres:16.2
+    container_name: judge0-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres_password_here
+      - POSTGRES_DB=judge0
+    volumes:
+      - judge0-db-data:/var/lib/postgresql/data
+    restart: always
+
+  judge0-redis:
+    image: redis:7.2.4
+    container_name: judge0-redis
+    command: redis-server --requirepass redis_password_here
+    restart: always
+
+volumes:
+  judge0-db-data:
