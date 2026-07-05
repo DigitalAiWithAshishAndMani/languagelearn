@@ -26,6 +26,10 @@ class Settings(BaseSettings):
 
     # Target Supported Programming Languages
     SUPPORTED_LANGUAGES: set[str] = {"python", "java", "cpp", "javascript"}
+
+    # MCP / LLM Tool-Calling Settings
+    ENABLE_TOOL_CALLING: bool = Field(default=True, validation_alias="ENABLE_TOOL_CALLING")
+    MAX_TOOL_ITERATIONS: int = Field(default=5, validation_alias="MAX_TOOL_ITERATIONS")
     
     class Config:
         env_file = ".env"
