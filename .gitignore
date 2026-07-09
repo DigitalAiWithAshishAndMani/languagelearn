@@ -134,3 +134,6 @@ frontend/.env.*.local
 
 # docs for the project
 docs/
+
+#the .db file
+backend/app/users.db
